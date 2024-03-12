@@ -1,5 +1,7 @@
 package com.example.authenticationservice.application.controller;
 
+import com.example.authenticationservice.domain.dto.auth.AuthRequest;
+import com.example.authenticationservice.domain.dto.auth.AuthResponse;
 import com.example.authenticationservice.domain.dto.login.LoginRequest;
 import com.example.authenticationservice.domain.dto.login.LoginResponse;
 import com.example.authenticationservice.domain.service.AuthenticationService;
@@ -20,8 +22,13 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        System.out.println("loginRequest From Controller | Auth Service = " + loginRequest);
         return ResponseEntity.ok(authenticationService.login(loginRequest));
+    }
+
+    @PostMapping("/authendicate")
+    public ResponseEntity<AuthResponse> authendicate(@RequestBody AuthRequest authRequest) {
+        System.out.println("authRequest from Controller = " + authRequest);
+        return ResponseEntity.ok(authenticationService.authendicate(authRequest));
     }
 
 }
