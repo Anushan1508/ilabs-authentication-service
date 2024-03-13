@@ -7,7 +7,6 @@ import com.example.authenticationservice.domain.dto.login.LoginResponse;
 import com.example.authenticationservice.domain.entities.UserEntity;
 import com.example.authenticationservice.domain.service.AuthenticationService;
 import com.example.authenticationservice.external.repository.UserRepository;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -20,7 +19,8 @@ import java.util.Optional;
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private static final String SECRET_KEY = "your_secret_key_here";
+    private byte[] secretKeyBytes = Keys.secretKeyFor(SignatureAlgorithm.HS256).getEncoded();
+    private String secretKey = Base64.getEncoder().encodeToString(secretKeyBytes);
 
     @Autowired
     UserRepository userRepository;
@@ -37,7 +37,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 String jwtToken = generateJwtToken(username, role);
                 LoginResponse loginResponse = new LoginResponse();
                 loginResponse.setResponseId(loginRequest.getRequest_id());
-                loginResponse.setResultCode("00");
+                loginResponse.setResultCode("200");
                 loginResponse.setResultDesc("Login Success");
                 loginResponse.setToken(jwtToken);
                 return loginResponse;
@@ -60,36 +60,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         AuthResponse authResponse = new AuthResponse();
         authResponse.setResponseId(authRequest.getRequestId());
         try {
-//            String username = Jwts.parserBuilder()
-//                    .setSigningKey(Keys.secretKeyFor(SignatureAlgorithm.HS256))
-//                    .build()
-//                    .parseClaimsJws(token)
-//                    .getBody()
-//                    .get("username", String.class);
-//
-//            String role = Jwts.parserBuilder()
-//                    .setSigningKey(Keys.secretKeyFor(SignatureAlgorithm.HS256))
-//                    .build()
-//                    .parseClaimsJws(token)
-//                    .getBody()
-//                    .get("role", String.class);
-//            Claims claims = Jwts.parser()
-//                    .setSigningKey(SECRET_KEY)
-//                    .parseClaimsJws(authRequest.getToken())
-//                    .getBody();
-//
-//            String username = claims.get("username", String.class);
-//            String role = claims.get("role", String.class);
-            String username = "user";
-            String role = "admin";
+            String username = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("username", String.class);
+
+            String role = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("role", String.class);
+
             if (role.equals("admin")) {
                 authResponse.setResultCode("200");
                 authResponse.setResultDesc("Authenticate Success");
+                authResponse.setUsername(username);
             } else {
                 authResponse.setResultCode("01");
                 authResponse.setResultDesc("Authenticate Failed");
             }
-            authResponse.setUsername(username);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -102,36 +94,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         AuthResponse authResponse = new AuthResponse();
         authResponse.setResponseId(authRequest.getRequestId());
         try {
-//            String username = Jwts.parserBuilder()
-//                    .setSigningKey(Keys.secretKeyFor(SignatureAlgorithm.HS256))
-//                    .build()
-//                    .parseClaimsJws(token)
-//                    .getBody()
-//                    .get("username", String.class);
-//
-//            String role = Jwts.parserBuilder()
-//                    .setSigningKey(Keys.secretKeyFor(SignatureAlgorithm.HS256))
-//                    .build()
-//                    .parseClaimsJws(token)
-//                    .getBody()
-//                    .get("role", String.class);
-//            Claims claims = Jwts.parser()
-//                    .setSigningKey(SECRET_KEY)
-//                    .parseClaimsJws(authRequest.getToken())
-//                    .getBody();
-//
-//            String username = claims.get("username", String.class);
-//            String role = claims.get("role", String.class);
-            String username = "user";
-            String role = "user";
+            String username = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("username", String.class);
+
+            String role = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("role", String.class);
+            System.out.println(role);
             if (role.equals("user")) {
                 authResponse.setResultCode("200");
                 authResponse.setResultDesc("Authenticate Success");
+                authResponse.setUsername(username);
             } else {
                 authResponse.setResultCode("01");
                 authResponse.setResultDesc("Authenticate Failed");
             }
-            authResponse.setUsername(username);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -139,8 +123,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private String generateJwtToken(String username, String role) {
-        byte[] secretKeyBytes = Keys.secretKeyFor(SignatureAlgorithm.HS256).getEncoded();
-        String secretKey = Base64.getEncoder().encodeToString(secretKeyBytes);
+//        byte[] secretKeyBytes = Keys.secretKeyFor(SignatureAlgorithm.HS256).getEncoded();
+//        String secretKey = Base64.getEncoder().encodeToString(secretKeyBytes);
 
         String jwtToken = Jwts.builder()
                 .claim("username", username)
