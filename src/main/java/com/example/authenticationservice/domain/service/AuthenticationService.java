@@ -8,5 +8,7 @@ import com.example.authenticationservice.domain.dto.login.LoginResponse;
 public interface AuthenticationService {
     LoginResponse login(LoginRequest loginRequest);
 
-    AuthResponse authendicate(AuthRequest authRequest);
+    AuthResponse autheAdmin(AuthRequest authRequest);
+
+    AuthResponse authUser(AuthRequest authRequest);
 }

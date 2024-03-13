@@ -25,10 +25,14 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationService.login(loginRequest));
     }
 
-    @PostMapping("/authendicate")
-    public ResponseEntity<AuthResponse> authendicate(@RequestBody AuthRequest authRequest) {
-        System.out.println("authRequest from Controller = " + authRequest);
-        return ResponseEntity.ok(authenticationService.authendicate(authRequest));
+    @PostMapping("/auth/admin")
+    public ResponseEntity<AuthResponse> authAdmin(@RequestBody AuthRequest authRequest) {
+        return ResponseEntity.ok(authenticationService.autheAdmin(authRequest));
+    }
+
+    @PostMapping("/auth/user")
+    public ResponseEntity<AuthResponse> authUser(@RequestBody AuthRequest authRequest) {
+        return ResponseEntity.ok(authenticationService.authUser(authRequest));
     }
 
 }

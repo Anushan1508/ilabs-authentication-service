@@ -55,7 +55,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public AuthResponse authendicate(AuthRequest authRequest) {
+    public AuthResponse autheAdmin(AuthRequest authRequest) {
         String token = authRequest.getToken();
         AuthResponse authResponse = new AuthResponse();
         authResponse.setResponseId(authRequest.getRequestId());
@@ -82,10 +82,49 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 //            String role = claims.get("role", String.class);
             String username = "user";
             String role = "admin";
-
-            System.out.println("username = " + username);
-            System.out.println("role = " + role);
             if (role.equals("admin")) {
+                authResponse.setResultCode("200");
+                authResponse.setResultDesc("Authenticate Success");
+            } else {
+                authResponse.setResultCode("01");
+                authResponse.setResultDesc("Authenticate Failed");
+            }
+            authResponse.setUsername(username);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return authResponse;
+    }
+
+    @Override
+    public AuthResponse authUser(AuthRequest authRequest) {
+        String token = authRequest.getToken();
+        AuthResponse authResponse = new AuthResponse();
+        authResponse.setResponseId(authRequest.getRequestId());
+        try {
+//            String username = Jwts.parserBuilder()
+//                    .setSigningKey(Keys.secretKeyFor(SignatureAlgorithm.HS256))
+//                    .build()
+//                    .parseClaimsJws(token)
+//                    .getBody()
+//                    .get("username", String.class);
+//
+//            String role = Jwts.parserBuilder()
+//                    .setSigningKey(Keys.secretKeyFor(SignatureAlgorithm.HS256))
+//                    .build()
+//                    .parseClaimsJws(token)
+//                    .getBody()
+//                    .get("role", String.class);
+//            Claims claims = Jwts.parser()
+//                    .setSigningKey(SECRET_KEY)
+//                    .parseClaimsJws(authRequest.getToken())
+//                    .getBody();
+//
+//            String username = claims.get("username", String.class);
+//            String role = claims.get("role", String.class);
+            String username = "user";
+            String role = "user";
+            if (role.equals("user")) {
                 authResponse.setResultCode("200");
                 authResponse.setResultDesc("Authenticate Success");
             } else {
