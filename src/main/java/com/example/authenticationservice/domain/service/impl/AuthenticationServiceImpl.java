@@ -27,6 +27,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
+        LoginResponse loginResponse = new LoginResponse();
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
         Optional<UserEntity> userEntity;
@@ -35,23 +36,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             if (userEntity.isPresent()) {
                 String role = userEntity.get().getRole();
                 String jwtToken = generateJwtToken(username, role);
-                LoginResponse loginResponse = new LoginResponse();
                 loginResponse.setResponseId(loginRequest.getRequest_id());
                 loginResponse.setResultCode("200");
                 loginResponse.setResultDesc("Login Success");
                 loginResponse.setToken(jwtToken);
-                return loginResponse;
             } else {
-                LoginResponse loginResponse = new LoginResponse();
                 loginResponse.setResponseId(loginRequest.getRequest_id());
-                loginResponse.setResultCode("01");
+                loginResponse.setResultCode("401");
                 loginResponse.setResultDesc("Login Failed");
-                return loginResponse;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return loginResponse;
     }
 
     @Override
@@ -60,19 +57,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         AuthResponse authResponse = new AuthResponse();
         authResponse.setResponseId(authRequest.getRequestId());
         try {
-            String username = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody()
-                    .get("username", String.class);
-
-            String role = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody()
-                    .get("role", String.class);
+            String username = getUsernameFromToken(token);
+            String role = getRoleFromToken(token);
 
             if (role.equals("admin")) {
                 authResponse.setResultCode("200");
@@ -83,7 +69,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 authResponse.setResultDesc("Authenticate Failed");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            authResponse.setResultCode("01");
+            authResponse.setResultDesc("Token Expired");
         }
         return authResponse;
     }
@@ -94,20 +81,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         AuthResponse authResponse = new AuthResponse();
         authResponse.setResponseId(authRequest.getRequestId());
         try {
-            String username = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody()
-                    .get("username", String.class);
-
-            String role = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody()
-                    .get("role", String.class);
-            System.out.println(role);
+            String username = getUsernameFromToken(token);
+            String role = getRoleFromToken(token);
             if (role.equals("user")) {
                 authResponse.setResultCode("200");
                 authResponse.setResultDesc("Authenticate Success");
@@ -117,15 +92,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 authResponse.setResultDesc("Authenticate Failed");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            authResponse.setResultCode("01");
+            authResponse.setResultDesc("Token Expired");
         }
         return authResponse;
     }
 
     private String generateJwtToken(String username, String role) {
-//        byte[] secretKeyBytes = Keys.secretKeyFor(SignatureAlgorithm.HS256).getEncoded();
-//        String secretKey = Base64.getEncoder().encodeToString(secretKeyBytes);
-
         String jwtToken = Jwts.builder()
                 .claim("username", username)
                 .claim("role", role)
@@ -133,5 +106,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .compact();
 
         return jwtToken;
+    }
+
+    private String getUsernameFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("username", String.class);
+    }
+
+    private String getRoleFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
     }
 }
